@@ -185,7 +185,6 @@ with mlflow.start_run() as mlflow_run:
 # COMMAND ----------
 
 print(result)
-print()
 
 # COMMAND ----------
 
