@@ -1,0 +1,22 @@
+resources:
+
+  jobs:
+    mlops:
+      name: mlops
+
+      tasks:
+        - task_key: feature_engineering
+          notebook_task:
+            notebook_path: ../src/ml/feature_engineering/FE_Housing.py
+            base_parameters:
+              catalog: ${var.catalog}
+        # for model training you can also use AutoML
+        - task_key: model_training
+          depends_on: 
+            - task_key: feature_engineering
+          notebook_task:
+            notebook_path: ../src/ml/model_training/UC_Experiment_FE_Log.py
+            base_parameters:
+              catalog: ${var.catalog}
+
+    

@@ -1,0 +1,66 @@
+bundle:
+  name: mlops_dabs_demo
+
+include:
+  - resources/*.yml
+
+variables: 
+  catalog:
+    default: dabs_${bundle.target}
+
+targets:
+  dev:
+    default: true
+
+    mode: development
+    workspace:
+      host: https://adb-193696825244583.3.azuredatabricks.net
+    run_as:
+      user_name: david.leiva@databricks.com
+
+    resources: 
+      jobs: 
+        mlops:
+          tasks:
+            - task_key: feature_engineering
+              existing_cluster_id: 0115-054109-zdrvy1eh
+            - task_key: model_training
+              existing_cluster_id: 0115-054109-zdrvy1eh
+
+  staging:
+    workspace:
+      host: https://adb-193696825244583.3.azuredatabricks.net
+    presets:
+      name_prefix: staging_
+
+    resources: 
+      jobs: 
+        mlops:
+          job_clusters:
+          - job_cluster_key: job_cluster
+            new_cluster:
+              spark_version: 15.4.x-cpu-ml-scala2.12
+              node_type_id: Standard_D4ads_v5
+              autoscale:
+                  min_workers: 1
+                  max_workers: 4
+          tasks:
+            - task_key: feature_engineering
+              # job_cluster_key: job_cluster
+              existing_cluster_id: 0115-054109-zdrvy1eh
+            
+            - task_key: model_training
+              # job_cluster_key: job_cluster
+              existing_cluster_id: 0115-054109-zdrvy1eh
+            
+            - task_key: upgrade_model
+              # job_cluster_key: job_cluster
+              existing_cluster_id: 0115-054109-zdrvy1eh
+              depends_on: 
+                - task_key: model_training
+              notebook_task: 
+                notebook_path: /src/ml/upgrade_model/upgrade_model.py
+                base_parameters: 
+                  source_catalog: ${var.catalog}
+                  prod_catalog: dabs_prod
+                  prod_schema: ml

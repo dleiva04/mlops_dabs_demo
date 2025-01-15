@@ -1,0 +1,11 @@
+resources:
+  jobs:
+    data_engineering_etl:
+      name: data_engineering_etl
+
+      tasks:
+        - task_key: ingestion
+          notebook_task:
+            notebook_path: ../src/de/ingest_housing_data.py
+            base_parameters:
+              catalog: ${var.catalog}
